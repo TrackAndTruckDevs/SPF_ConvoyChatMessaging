@@ -32,7 +32,7 @@
  * // In your plugin's OnLoad function:
  * SPF_BOOL OnLoad(SPF_Load_API* api) {
  *     // Get the logger context for this plugin
- *     s_hLog = api->logger->Log_GetContext("SPF_ConvoyChatMessaging");
+ *     s_hLog = api->logger->Log_GetContext("MyPlugin");
  *     s_fmt = api->formatting;
  *     return TRUE;
  * }
@@ -101,7 +101,7 @@ typedef struct SPF_Logger_API {
      * This function should be called once during plugin initialization (e.g., in OnLoad).
      * The returned handle is valid for the entire lifetime of the plugin and should be stored.
      *
-     * @param pluginName The unique name of the plugin (e.g., "SPF_ConvoyChatMessaging"). This should match
+     * @param pluginName The unique name of the plugin (e.g., "MyPlugin"). This should match
      *                   the name used in the plugin's manifest and directory structure.
      * @return A handle to the logger instance. Returns NULL on failure.
      */
@@ -151,7 +151,7 @@ typedef struct SPF_Logger_API {
      * @param throttle_key A unique, persistent string literal that identifies this
      *                     specific log message. The framework uses this key to track
      *                     when the message was last logged.
-     *                     Example: "SPF_ConvoyChatMessaging.update.position_log"
+     *                     Example: "myplugin.update.position_log"
      * @param throttle_ms The minimum time in milliseconds that must pass before
      *                    this message can be logged again.
      * @param message The pre-formatted string to log.

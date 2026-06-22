@@ -18,12 +18,12 @@
 *                                                                                                 
 * 2. **Smart Naming**: The API automatically handles plugin-specific namespaces. 
 *    You no longer need to manually prepend your Plugin ID to every action name.
-*    - Providing "toggle" results in "SPF_ConvoyChatMessaging.toggle".
-*    - Providing "UI.Menu.open" results in "SPF_ConvoyChatMessaging.UI.Menu.open".
+*    - Providing "toggle" results in "MyPlugin.toggle".
+*    - Providing "UI.Menu.open" results in "MyPlugin.UI.Menu.open".
 *    - Names already starting with your Plugin ID remain unchanged.
 *                                                                                                 
 * 3. **Dot Notation**: Full action names are formed as 'PluginID.GroupName.ActionName' 
-*    (e.g., 'SPF_ConvoyChatMessaging.UI.MainWindow.toggle'). The framework uses the last period 
+*    (e.g., 'MyPlugin.UI.MainWindow.toggle'). The framework uses the last period 
 *    to separate the group from the action name in the settings file.
 *                                                                                                 
 * 4. **Automatic Cleanup**: Keybind handles are managed by the framework. All 
@@ -42,10 +42,10 @@
 * }
 *
 * void OnActivated(const SPF_Core_API* api) {
-*     SPF_KeyBinds_Handle* h = api->keybinds->Kbind_GetContext("SPF_ConvoyChatMessaging");
+*     SPF_KeyBinds_Handle* h = api->keybinds->Kbind_GetContext("MyPlugin");
 *
 *     // SMART NAMING: You can use short names now.
-*     // The framework automatically treats this as "SPF_ConvoyChatMessaging.General.DoWork".
+*     // The framework automatically treats this as "MyPlugin.General.DoWork".
 *     api->keybinds->Kbind_Register(h, "General.DoWork", MyActionCallback);
 *
 *     // Check how many bindings are assigned and their properties
@@ -147,7 +147,7 @@ typedef struct SPF_KeyBinds_Handle SPF_KeyBinds_Handle;
 /**
  * @brief Advanced callback type that receives the action ID and user-provided data.
  *
- * @param action_id The full internal name of the action that was triggered (e.g., "SPF_ConvoyChatMessaging.UI.toggle").
+ * @param action_id The full internal name of the action that was triggered (e.g., "MyPlugin.UI.toggle").
  * @param user_data The pointer that was passed during registration.
  */
 typedef void (*SPF_Keybind_Callback_Ex)(const char* action_id, void* user_data);
@@ -162,7 +162,7 @@ typedef void (*SPF_Keybind_Callback_Ex)(const char* action_id, void* user_data);
  *
  * 1.  **Action**: A named, logical operation. While the final internal key is always 
  *     `PluginID.GroupName.ActionName`, the API handles the `PluginID` prefix automatically. 
- *     Example: If your plugin is "SPF_ConvoyChatMessaging", providing `"UI.toggle"` results in `"SPF_ConvoyChatMessaging.UI.toggle"`.
+ *     Example: If your plugin is "MyPlugin", providing `"UI.toggle"` results in `"MyPlugin.UI.toggle"`.
  *
  * 2.  **Keybind**: A specific keyboard or gamepad input configuration that triggers an action.
  *     Default keybinds are defined in the manifest, but the user can always override
@@ -188,12 +188,12 @@ typedef void (*SPF_Keybind_Callback_Ex)(const char* action_id, void* user_data);
  * - If you provide a group like `"UI.open"`, it becomes `"{PluginID}.UI.open"`.
  * - If you provide a full name that already starts with your Plugin ID, it remains unchanged.
  *
- * ### Examples (for a plugin named "SPF_ConvoyChatMessaging"):
+ * ### Examples (for a plugin named "MyPlugin"):
  * | Input Name          | Internal Full Key (Result)      |
  * |---------------------|---------------------------------|
- * | "honk"              | "SPF_ConvoyChatMessaging.honk"                 |
- * | "Camera.cycle"      | "SPF_ConvoyChatMessaging.Camera.cycle"         |
- * | "SPF_ConvoyChatMessaging.test"     | "SPF_ConvoyChatMessaging.test" (no change)     |
+ * | "honk"              | "MyPlugin.honk"                 |
+ * | "Camera.cycle"      | "MyPlugin.Camera.cycle"         |
+ * | "MyPlugin.test"     | "MyPlugin.test" (no change)     |
  *
  * This ensures that your actions are always isolated from other plugins and 
  * correctly displayed in your plugin's section in the settings menu.
@@ -205,12 +205,12 @@ typedef void (*SPF_Keybind_Callback_Ex)(const char* action_id, void* user_data);
  * }
  *
  * void OnActivated(const SPF_Core_API* api) {
- *     SPF_KeyBinds_Handle* h = api->keybinds->Kbind_GetContext("SPF_ConvoyChatMessaging");
+ *     SPF_KeyBinds_Handle* h = api->keybinds->Kbind_GetContext("MyPlugin");
  *
  *     // You can use short names now!
  *     api->keybinds->Kbind_Register(h, "General.DoWork", MyActionCallback);
  *
- *     // The internal key will be "SPF_ConvoyChatMessaging.General.DoWork"
+ *     // The internal key will be "MyPlugin.General.DoWork"
  *     int count = api->keybinds->Kbind_GetBindingCount(h, "General.DoWork");
  *     for (int i = 0; i < count; i++) {
  *         char name[64];
@@ -246,7 +246,7 @@ typedef struct SPF_KeyBinds_API {
      * @param actionName The logical name of the action (e.g., "UI.toggle").
      *                   ### Smart Naming:
      *                   The API automatically prepends your Plugin ID if it's missing.
-     *                   Example: "toggle" becomes "SPF_ConvoyChatMessaging.toggle".
+     *                   Example: "toggle" becomes "MyPlugin.toggle".
      * @param callback The function pointer to be called when the action is triggered.
      *                 The callback function must have a `void(void)` signature.
      */

@@ -8,6 +8,7 @@
  */
 
 #include "SPF_ConvoyChatMessaging.hpp"
+#include <cstdio>
 #include <cstring>
 #include <Windows.h>
 #include <algorithm>
@@ -67,43 +68,83 @@ void OnActivated(const SPF_Core_API* core_api) {
     auto hooks = g_ctx.coreAPI->hooks;
     g_ctx.hooksAPI = hooks;
 
-    // --- STEP 1: Find the AddToChat function (Visual logic) ---
-    // This signature matches the prologue of FUN_140805c30.
-    // It is used to display messages in the local chat window.
-    // 48 89 5C 24 08 44 88 4C 24 20 66 89 54 24 10 55 56 57 41 54 41 55 41 56 41 57 48 8D AC 24 80 F8 FF FF ver. ATS 1.59.2
-    const char* addToChatSig = "48 89 ? ? ? 44 88 ? ? ? 66 89 ? ? ? ? ? ? ? ? ? ? ? ? ? ? 48 8D";
-    g_ctx.fnAddToChat = (AddToChat_t)hooks->Hook_FindPattern(addToChatSig);
+    auto logMsg = [&](SPF_LogLevel level, const char* fmt, auto... args) {
+        if (!g_ctx.coreAPI || !g_ctx.coreAPI->logger || !g_ctx.loggerHandle) return;
 
+        char buf[512];
+        if (g_ctx.formattingAPI) {
+            g_ctx.formattingAPI->Fmt_Format(buf, sizeof(buf), fmt, args...);
+        } else {
+            snprintf(buf, sizeof(buf), fmt, args...);
+        }
+        g_ctx.coreAPI->logger->Log(g_ctx.loggerHandle, level, buf);
+    };
+
+    // --- STEP 1: Find the AddToChat function (Visual logic) ---
+    // This signature matches the prologue of FUN_1408a42c0 (ver 1.60).
+    // It is used to display messages in the local chat window.
+    const char* addToChatStr = "str:@@mp_chat_system@@";
+    logMsg(SPF_LOG_INFO, "[STEP 1] Searching AddToChat by string: %s", addToChatStr);
+    g_ctx.fnAddToChat = (AddToChat_t)hooks->Hook_FindFunctionByString("@@mp_chat_system@@", true, nullptr, 0);
+    logMsg(SPF_LOG_INFO, "[STEP 1] AddToChat function %s at 0x%llX",
+           g_ctx.fnAddToChat ? "found" : "not found",
+           (unsigned long long)(uintptr_t)g_ctx.fnAddToChat);
     if (g_ctx.fnAddToChat) {
-        // We install a hook to intercept INCOMING messages from other players or the game itself.
+        logMsg(SPF_LOG_INFO, "[STEP 1] Registering hook: %s", addToChatStr);
         hooks->Hook_Register(
             "SPF_ConvoyChatMessaging", "ChatIntercept", "Intercepts messages before display",
-            (void*)&Detour_AddToChat, (void**)&g_ctx.o_AddToChat, addToChatSig, true
+            (void*)&Detour_AddToChat, (void**)&g_ctx.o_AddToChat, addToChatStr, true
         );
+        logMsg(SPF_LOG_INFO, "[STEP 1] ChatIntercept hook registered");
+    } else {
+        logMsg(SPF_LOG_WARN, "[STEP 1] Skipping hook registration because AddToChat was not found");
     }
 
-    // --- STEP 2: Extract Global Manager Address & Offset ---
-    // We search for a specific code block in FUN_14080ecc0 that accesses the Multiplayer Manager.
-    // Signature: MOV RSI, [GlobalMgr]; LEA RDX, [String]; ... ; CMP [RSI+Offset], RAX
-    // 48 8b 35 da 6f bb 02 48 8d 15 4b 3f 81 01 48 89 54 24 38 48 39 86 40 02 00 00 0f 84 de 00 00 00 48 8d 95 78 03 00 00  ver. ATS 1.59.2
-    const char* managerFinderSig = "48 8b ? ? ? ? ? 48 ? ? ? ? ? ? 48 89 ? ? ? 48 39 86 ? ? ? ? 0f 84 ? ? ? ? 48 ? ? ? ? ? ? 48";
-    uintptr_t finderAddr = hooks->Hook_FindPattern(managerFinderSig);
-    if (finderAddr != 0) {
-        // First instruction (7 bytes): 48 8B 35 [offset_32] -> Extract RIP-relative address of ppGlobalManager
-        g_ctx.ppGlobalManager = (void**)hooks->Memory_GetRipAddress(finderAddr, 3, 7);
-        
-        // Fourth instruction (+19 bytes): 48 39 86 [offset_32] -> Extract 32-bit offset to ChatManager
-        g_ctx.chatManagerOffset = *(uint32_t*)(finderAddr + 19 + 3);
+    // --- STEP 2: Extract pUIManager Address & Offset ---
+    // Find the string first, then walk backward to the nearby MOV RSI, [pUIManager].
+    // The cmp [rsi + offset], rax is in the same local block right after it.
+    const char* leavingPrivateStr = "@@mp_leaving_private@@"; //1408ad8b5
+    logMsg(SPF_LOG_INFO, "[STEP 2] Searching string: %s", leavingPrivateStr);
+    uintptr_t leavingStrAddr = hooks->Hook_FindFunctionByString(leavingPrivateStr, false, nullptr, 0);
+    logMsg(SPF_LOG_INFO, "[STEP 2] String %s at 0x%llX",
+           leavingStrAddr ? "found" : "not found",
+           (unsigned long long)leavingStrAddr);
+    if (leavingStrAddr != 0) {
+        uintptr_t finderAddr = hooks->Hook_FindBackward(leavingStrAddr, 16, "48 8B [05-3D]"); //1408ad8a7
+        logMsg(SPF_LOG_INFO, "[STEP 2] MOV pattern %s at 0x%llX",
+               finderAddr ? "found" : "not found",
+               (unsigned long long)finderAddr);
+        if (finderAddr != 0) {
+            // First instruction (7 bytes): 48 8B 35 [offset_32] -> Extract RIP-relative address of pUIManager
+            g_ctx.ppUIManager = (void**)hooks->Memory_GetRipAddress(finderAddr, 3, 7);
+            logMsg(SPF_LOG_INFO, "[STEP 2] pUIManager pointer slot = 0x%llX",
+                   (unsigned long long)(uintptr_t)g_ctx.ppUIManager);
+        }
+        // Find the nearby CMP [RSI + offset], RAX and read the 32-bit offset.
+        uintptr_t cmpAddr = hooks->Hook_FindPatternFrom("48 39 [81-86]", leavingStrAddr, 32); // 1408ad8ba
+        logMsg(SPF_LOG_INFO, "[STEP 2] CMP pattern %s at 0x%llX",
+               cmpAddr ? "found" : "not found",
+               (unsigned long long)cmpAddr);
+        if (cmpAddr != 0) {
+            g_ctx.chatManagerOffset = (uint32_t)hooks->Memory_ReadInt32(cmpAddr + 3);
+            logMsg(SPF_LOG_INFO, "[STEP 2] chatManagerOffset = 0x%X", g_ctx.chatManagerOffset);
+        } else {
+            logMsg(SPF_LOG_WARN, "[STEP 2] chatManagerOffset not resolved");
+        }
+    } else {
+        logMsg(SPF_LOG_WARN, "[STEP 2] Skipping pUIManager lookup because string was not found");
     }
 
     // --- STEP 3: Register Input Hook ---
-    // This hook on FUN_140804a50 allows us to capture the live chat manager instance (RCX).
-    // 48 89 7c 24 20 55 41 54 41 55 41 56 41 57 48 8b ec 48 81 ec 80 00 00 00 48 8b 3a 49 c7 c6 ff ff ff ff 49 8b c6   ver. ATS 1.59.2
-    const char* inputHandlerSig = "48 89 7C ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? 48 8B ? 49 c7 ? ? ? ? ? 49";
+    // This hook on FUN_1408a2fa0 allows us to capture the live chat manager instance (RCX).
+    // ver. ATS 1.60
+    const char* inputHandlerSig = "str:@@mp_chat_no_admin@@";
+    logMsg(SPF_LOG_INFO, "[STEP 3] Registering input hook by string: %s", inputHandlerSig);
     hooks->Hook_Register(
         "SPF_ConvoyChatMessaging", "ChatInput", "Captures ChatManager instance",
         (void*)&Detour_ChatInputHandler, (void**)&g_ctx.o_ChatInputHandler, inputHandlerSig, true
     );
+    logMsg(SPF_LOG_INFO, "[STEP 3] ChatInput hook registered");
 
     // --- STEP 4: Keybinds ---
     if (g_ctx.coreAPI->keybinds) {
@@ -111,16 +152,16 @@ void OnActivated(const SPF_Core_API* core_api) {
         g_ctx.coreAPI->keybinds->Kbind_Register(g_ctx.keybindsHandle, "MainWindow.toggle", OnToggleMainWindow);
     }
 
-    g_ctx.loadAPI->logger->Log(g_ctx.loggerHandle, SPF_LOG_INFO, "Convoy Chat Messaging plugin fully activated.");
+    logMsg(SPF_LOG_INFO, "Convoy Chat Messaging plugin fully activated.");
 }
 
 void OnUpdate() {
     // Continuously try to resolve the chat manager instance if not yet captured
-    if (g_ctx.chatManagerInstance == nullptr && g_ctx.ppGlobalManager != nullptr) {
-        void* pGlobal = *g_ctx.ppGlobalManager;
-        if (pGlobal != nullptr) {
-            // Navigate the object tree: GameManager -> [Offset] -> ChatManager
-            void* resolved = *(void**)((uintptr_t)pGlobal + g_ctx.chatManagerOffset);
+    if (g_ctx.chatManagerInstance == nullptr && g_ctx.ppUIManager != nullptr) {
+        void* pUIManager = *g_ctx.ppUIManager;
+        if (pUIManager != nullptr) {
+            // Navigate the object tree: pUIManager -> [Offset] -> ChatManager
+            void* resolved = *(void**)((uintptr_t)pUIManager + g_ctx.chatManagerOffset);
             if (resolved != nullptr) {
                 g_ctx.chatManagerInstance = resolved;
             }

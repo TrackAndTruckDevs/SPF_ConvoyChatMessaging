@@ -29,8 +29,8 @@
 *     float speed = data->speed * 3.6f; // Convert to km/h
 * }
 *
-* void SPF_ConvoyChatMessaging_OnActivated(const SPF_Core_API* api) {
-*     SPF_Telemetry_Handle* h = api->telemetry->Tel_GetContext("SPF_ConvoyChatMessaging");
+* void MyPlugin_OnActivated(const SPF_Core_API* api) {
+*     SPF_Telemetry_Handle* h = api->telemetry->Tel_GetContext("MyPlugin");
 *     
 *     // Subscribe to truck data updates
 *     api->telemetry->Tel_RegisterForTruckData(h, OnTruckUpdate, NULL);
@@ -182,7 +182,7 @@ typedef void (*SPF_Telemetry_GearboxConstants_Callback)(const SPF_GearboxConstan
  * automatic management of callback subscriptions.
  *
  * 1.  **Get Context Handle:** In your plugin's activation phase, get your plugin's main telemetry context
- *     handle via `GetContext("SPF_ConvoyChatMessagingName")`. This handle will manage all subsequent subscriptions.
+ *     handle via `GetContext("MyPluginName")`. This handle will manage all subsequent subscriptions.
  *
  * 2.  **Define Callback:** Create a callback function with the correct signature for the event you need
  *     (e.g., `SPF_Telemetry_TruckData_Callback`).
@@ -200,12 +200,12 @@ typedef void (*SPF_Telemetry_GearboxConstants_Callback)(const SPF_GearboxConstan
  * @section Example: Reacting to Truck Data Updates
  * @code{.c}
  * // Global context for the plugin
- * SPF_ConvoyChatMessagingContext g_my_context;
+ * MyPluginContext g_my_context;
  *
  * // 1. Define the callback function.
  * void OnTruckData(const SPF_TruckData* data, void* user_data) {
  *     // user_data points to our global context
- *     SPF_ConvoyChatMessagingContext* ctx = (SPF_ConvoyChatMessagingContext*)user_data;
+ *     MyPluginContext* ctx = (MyPluginContext*)user_data;
  *     // Cache the new data
  *     ctx->last_truck_data = *data;
  *     printf("Current speed: %f m/s\n", data->speed);
@@ -216,7 +216,7 @@ typedef void (*SPF_Telemetry_GearboxConstants_Callback)(const SPF_GearboxConstan
  *     g_my_context.telemetry_api = core_api->telemetry;
  *
  *     // 2. Get the main context handle
- *     g_my_context.telemetry_handle = g_my_context.telemetry_api->GetContext("SPF_ConvoyChatMessaging");
+ *     g_my_context.telemetry_handle = g_my_context.telemetry_api->GetContext("MyPlugin");
  *
  *     // 3. Register the callback. The returned handle's lifetime is managed automatically.
  *     g_my_context.truck_data_callback_handle = g_my_context.telemetry_api->RegisterForTruckData(

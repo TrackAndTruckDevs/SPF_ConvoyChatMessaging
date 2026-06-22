@@ -80,7 +80,7 @@ struct PluginContext {
     AddToChat_t o_AddToChat = nullptr;               // Trampoline for the AddToChat hook
     ChatInputHandler_t o_ChatInputHandler = nullptr; // Trampoline for the ChatInputHandler hook
 
-    void** ppGlobalManager = nullptr;                // Pointer to the global game manager (extracted from code)
+    void** ppUIManager = nullptr;                    // Pointer to pUIManager (extracted from code)
     uint32_t chatManagerOffset = 0;                  // Offset to the chat manager within the global manager
     void* chatManagerInstance = nullptr;             // The live pointer to the chat manager object
 

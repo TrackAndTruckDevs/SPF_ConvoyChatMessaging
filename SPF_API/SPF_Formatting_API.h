@@ -32,7 +32,7 @@
 * SPF_Logger_API* log = api->logger;
 * 
 * // Get logger handle once (e.g. in OnLoad)
-* SPF_Logger_Handle* hLog = log->Log_GetContext("SPF_ConvoyChatMessaging");
+* SPF_Logger_Handle* hLog = log->Log_GetContext("MyPlugin");
 *
 * void LogValue(int value) {
 *     char buffer[256];

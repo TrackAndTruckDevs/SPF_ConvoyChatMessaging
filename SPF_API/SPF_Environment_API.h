@@ -31,8 +31,8 @@
 * USAGE EXAMPLE (C++)                                                                             
 * ================================================================================================
 * @code                                                                                           
-* void SPF_ConvoyChatMessaging_OnActivated(const SPF_Core_API* api) {
-*     SPF_Environment_Handle* h = api->environment->Env_GetContext("SPF_ConvoyChatMessaging");
+* void MyPlugin_OnActivated(const SPF_Core_API* api) {
+*     SPF_Environment_Handle* h = api->environment->Env_GetContext("MyPlugin");
 *
 *     // 1. Get the profile name
 *     char profileName[64];
@@ -311,7 +311,7 @@ typedef struct SPF_Environment_API {
     /**
      * @brief Gets the root physical path of the calling plugin.
      * @param h The context handle.
-     * @param out_buffer Buffer to receive the path (e.g., "spfPlugins/SPF_ConvoyChatMessaging/").
+     * @param out_buffer Buffer to receive the path (e.g., "spfPlugins/MyPlugin/").
      * @return Length of the path string.
      */
     int (*Env_GetPluginDir)(SPF_Environment_Handle* h, char* out_buffer, int buffer_size);
@@ -319,7 +319,7 @@ typedef struct SPF_Environment_API {
     /**
      * @brief Gets the physical path to the plugin's configuration directory.
      * @param h The context handle.
-     * @param out_buffer Buffer to receive the path (e.g., "spfPlugins/SPF_ConvoyChatMessaging/config/").
+     * @param out_buffer Buffer to receive the path (e.g., "spfPlugins/MyPlugin/config/").
      * @return Length of the path string.
      */
     int (*Env_GetPluginConfigDir)(SPF_Environment_Handle* h, char* out_buffer, int buffer_size);
@@ -327,7 +327,7 @@ typedef struct SPF_Environment_API {
     /**
      * @brief Gets the physical path to the plugin's localization directory.
      * @param h The context handle.
-     * @param out_buffer Buffer to receive the path (e.g., "spfPlugins/SPF_ConvoyChatMessaging/localization/").
+     * @param out_buffer Buffer to receive the path (e.g., "spfPlugins/MyPlugin/localization/").
      * @return Length of the path string.
      */
     int (*Env_GetPluginLocalizationDir)(SPF_Environment_Handle* h, char* out_buffer, int buffer_size);
@@ -335,7 +335,7 @@ typedef struct SPF_Environment_API {
     /**
      * @brief Gets the physical path to the plugin's logs directory.
      * @param h The context handle.
-     * @param out_buffer Buffer to receive the path (e.g., "spfPlugins/SPF_ConvoyChatMessaging/logs/").
+     * @param out_buffer Buffer to receive the path (e.g., "spfPlugins/MyPlugin/logs/").
      * @return Length of the path string.
      */
     int (*Env_GetPluginLogsDir)(SPF_Environment_Handle* h, char* out_buffer, int buffer_size);
@@ -343,7 +343,7 @@ typedef struct SPF_Environment_API {
     /**
      * @brief Gets the physical path to the plugin's data directory.
      * @param h The context handle.
-     * @param out_buffer Buffer to receive the path (e.g., "spfPlugins/SPF_ConvoyChatMessaging/data/").
+     * @param out_buffer Buffer to receive the path (e.g., "spfPlugins/MyPlugin/data/").
      * @return Length of the path string.
      */
     int (*Env_GetPluginDataDir)(SPF_Environment_Handle* h, char* out_buffer, int buffer_size);
@@ -355,6 +355,15 @@ typedef struct SPF_Environment_API {
      * @return true if the directory was created or already exists.
      */
     bool (*Env_CreatePath)(SPF_Environment_Handle* h, const char* path);
+
+    /**
+     * @brief Gets the type of the active profile (e.g., "Steam Cloud", "Local", "Demo").
+     * @param h The context handle.
+     * @param out_buffer Buffer to receive the type string.
+     * @param buffer_size Size of the output buffer.
+     * @return Length of the type string.
+     */
+    int (*Env_GetActiveProfileType)(SPF_Environment_Handle* h, char* out_buffer, int buffer_size);
 
 } SPF_Environment_API;
 

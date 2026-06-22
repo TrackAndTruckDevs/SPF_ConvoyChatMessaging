@@ -22,7 +22,7 @@
 * writer->Json_SetNode(root, "features", features);
 * 
 * // Save it using IO_API...
-* io->Json_SaveToFile(root, "plugins/SPF_ConvoyChatMessaging/data/info.json", true);
+* io->Json_SaveToFile(root, "plugins/MyPlugin/data/info.json", true);
 * 
 * // Don't forget to destroy the root handle when finished
 * writer->Json_DestroyHandle(root);

@@ -24,7 +24,7 @@
 * ================================================================================================
 * @code                                                                                           
 * // 1. Define your rendering logic
-* void SPF_ConvoyChatMessaging_RenderWindow(SPF_UI_API* ui, void* user_data) {
+* void MyPlugin_RenderWindow(SPF_UI_API* ui, void* user_data) {
 *     ui->UI_Text("Welcome to my Plugin!");
 *     
 *     static bool my_bool = false;
@@ -35,7 +35,7 @@
 *
 * // 2. Register the callback during initialization
 * void OnRegisterUI(SPF_UI_API* api) {
-*     api->UI_RegisterDrawCallback("SPF_ConvoyChatMessaging", "MainWindow", SPF_ConvoyChatMessaging_RenderWindow, nullptr);
+*     api->UI_RegisterDrawCallback("MyPlugin", "MainWindow", MyPlugin_RenderWindow, nullptr);
 * }
 * @endcode                                                                                        
 */ 

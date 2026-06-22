@@ -23,8 +23,8 @@
 * USAGE EXAMPLE (C++)                                                                             
 * ================================================================================================
 * @code                                                                                           
-* void SPF_ConvoyChatMessaging_OnActivated(const SPF_Core_API* api) {
-*     SPF_Localization_Handle* h = api->localization->Loc_GetContext("SPF_ConvoyChatMessaging");
+* void MyPlugin_OnActivated(const SPF_Core_API* api) {
+*     SPF_Localization_Handle* h = api->localization->Loc_GetContext("MyPlugin");
 *     
 *     char buffer[256];
 *     api->localization->Loc_GetString(h, "ui.welcome_msg", buffer, sizeof(buffer));
@@ -56,8 +56,8 @@ typedef struct SPF_Localization_Handle SPF_Localization_Handle;
  * @section Workflow
  * 1.  **File Structure**: Place your translation files in a dedicated folder
  *     within your plugin's directory, typically `localization/`. For example:
- *     - `SPF_ConvoyChatMessaging/localization/en.json`
- *     - `SPF_ConvoyChatMessaging/localization/uk.json`
+ *     - `MyPlugin/localization/en.json`
+ *     - `MyPlugin/localization/uk.json`
  * 2.  **Manifest**: Specify the default language in your plugin's manifest, e.g., `"en"`.
  * 3.  **Get Context**: In your `OnActivated` function, call `Loc_GetContext()` to get a
  *     handle for your plugin.
@@ -74,7 +74,7 @@ typedef struct SPF_Localization_Handle SPF_Localization_Handle;
  * a key in the format `language.[lang_code]` (e.g., "language.en", "language.uk").
  *
  * To ensure your language names are properly translated in the UI, you must include
- * these keys in your component's localization files (e.g., `SPF_ConvoyChatMessaging/localization/en.json`).
+ * these keys in your component's localization files (e.g., `MyPlugin/localization/en.json`).
  *
  * @b Example:
  * In your `[component]/localization/en.json` file:

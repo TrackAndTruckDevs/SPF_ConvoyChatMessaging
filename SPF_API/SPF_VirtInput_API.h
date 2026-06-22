@@ -34,7 +34,7 @@
  *
  * void OnActivated(const SPF_Core_API* api) {
  *     // 1. Create a generic device
- *     s_hDevice = api->input->Virt_CreateDevice("SPF_ConvoyChatMessaging", "v_pad", "My Virtual Pad", SPF_INPUT_DEVICE_TYPE_GENERIC);
+ *     s_hDevice = api->input->Virt_CreateDevice("MyPlugin", "v_pad", "My Virtual Pad", SPF_INPUT_DEVICE_TYPE_GENERIC);
  *     
  *     if (s_hDevice) {
  *         // 2. Add inputs (before registering)

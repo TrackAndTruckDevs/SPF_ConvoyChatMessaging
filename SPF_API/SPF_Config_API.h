@@ -4,7 +4,7 @@
 *                                                                                                 
 * @details This API provides a persistent key-value store for plugins. Settings are               
 * automatically stored in a JSON file (`settings.json`) located in the plugin's                   
-* dedicated directory (e.g., `plugins/SPF_ConvoyChatMessaging/config/`).                                         
+* dedicated directory (e.g., `plugins/MyPlugin/config/`).                                         
 *                                                                                                 
 * The API supports simple data types (int, bool, float, string) and provides advanced             
 * access to complex JSON structures through opaque handles.                                       
@@ -33,7 +33,7 @@
 * ================================================================================================
 * @code                                                                                           
 * // During initialization (OnLoad):                                                              
-* SPF_Config_Handle* h = api->Cfg_GetContext("SPF_ConvoyChatMessaging");                                             
+* SPF_Config_Handle* h = api->Cfg_GetContext("MyPlugin");                                             
 *                                                                                                 
 * // Reading a value:                                                                             
 * int32_t speed = api->Cfg_GetInt32(h, "settings.max_speed", 90);                                 
@@ -73,7 +73,7 @@ typedef struct SPF_JsonValue_Handle SPF_JsonValue_Handle;
  *
  * @details This API provides a simple key-value store for plugins to save and
  *          retrieve settings. The configuration is stored as a JSON file in the
- *          plugin's dedicated configuration directory (e.g., `plugins/SPF_ConvoyChatMessaging/config/settings.json`).
+ *          plugin's dedicated configuration directory (e.g., `plugins/MyPlugin/config/settings.json`).
  *          The API handles the reading and writing of the file, and provides
  *          type-safe functions for getting and setting values.
  *

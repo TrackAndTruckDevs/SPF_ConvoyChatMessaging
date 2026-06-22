@@ -35,7 +35,7 @@
 * }
 *
 * void OnActivated(const SPF_Core_API* api) {
-*     SPF_GameLog_Handle* h = api->gamelog->GLog_GetContext("SPF_ConvoyChatMessaging");
+*     SPF_GameLog_Handle* h = api->gamelog->GLog_GetContext("MyPlugin");
 *     api->gamelog->GLog_RegisterCallback(h, OnGameLog, nullptr);
 * }
 * @endcode                                                                                        

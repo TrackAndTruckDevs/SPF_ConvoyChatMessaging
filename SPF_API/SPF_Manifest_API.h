@@ -14,7 +14,7 @@
  * // Recommended: Use a constant for your plugin name.
  * const char* PLUGIN_NAME = "MySuperPlugin";
  *
- * void SPF_ConvoyChatMessaging_BuildManifest(SPF_Manifest_Builder_Handle* h, const SPF_Manifest_Builder_API* api) {
+ * void MyPlugin_BuildManifest(SPF_Manifest_Builder_Handle* h, const SPF_Manifest_Builder_API* api) {
  *
  *     // --- 1. Basic Identity ---
  *     api->Info_SetName(h, PLUGIN_NAME);               // Internal unique ID (No spaces)
@@ -85,7 +85,7 @@
  * // Standard export function required by the framework
  * extern "C" SPF_PLUGIN_EXPORT bool SPF_GetManifestAPI(SPF_Manifest_API* out_api) {
  *     if (!out_api) return false;
- *     out_api->BuildManifest = SPF_ConvoyChatMessaging_BuildManifest;
+ *     out_api->BuildManifest = MyPlugin_BuildManifest;
  *     return true;
  * }
  * @endcode
@@ -129,7 +129,7 @@ typedef struct SPF_Manifest_Builder_API {
     /**
      * @brief Sets the internal programmatic name of the plugin.
      * @param h The builder handle.
-     * @param name The unique name (e.g., "SPF_ConvoyChatMessaging"). MUST match the name used in `GetContext` calls.
+     * @param name The unique name (e.g., "MyPlugin"). MUST match the name used in `GetContext` calls.
      *             No spaces or special characters allowed.
      */
     void (*Info_SetName)(SPF_Manifest_Builder_Handle* h, const char* name);
@@ -317,7 +317,7 @@ typedef struct SPF_Manifest_Builder_API {
      * @param groupName  Action group identifier (e.g., "Movement"). Used for UI grouping.
      *                   ### Smart Naming:
      *                   The API automatically prepends your Plugin ID to the group name if it's missing.
-     *                   Example: "Movement" becomes "SPF_ConvoyChatMessaging.Movement".
+     *                   Example: "Movement" becomes "MyPlugin.Movement".
      *                   If you provide a name that already starts with your Plugin ID, it remains unchanged.
      * @param actionName The logical action name (e.g., "forward"). 
      *                   The full logical action key is formed as "groupName.actionName".

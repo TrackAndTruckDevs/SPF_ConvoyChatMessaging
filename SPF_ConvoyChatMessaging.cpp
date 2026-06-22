@@ -24,10 +24,12 @@ PluginContext g_ctx;
 void BuildManifest(SPF_Manifest_Builder_Handle* h, const SPF_Manifest_Builder_API* api) {
     {
         api->Info_SetName(h, "SPF_ConvoyChatMessaging");
-        api->Info_SetVersion(h, "1.1.0");
-        api->Info_SetMinFrameworkVersion(h, "1.1.9");
+        api->Info_SetVersion(h, "1.1.1");
+        api->Info_SetMinFrameworkVersion(h, "1.2.0");
         api->Info_SetAuthor(h, "Track'n'Truck Devs");
         api->Info_SetDescriptionLiteral(h, "Reference plugin for Convoy Chat manipulation and interception.");
+
+        api->Info_SetGithubUrl(h, "https://github.com/TrackAndTruckDevs/SPF_ConvoyChatMessaging");
     }
 
     {
